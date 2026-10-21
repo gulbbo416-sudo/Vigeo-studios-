@@ -3,155 +3,140 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Veggie AI Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veggie Cartoon Studio</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#080b16;color:#fff;font-family:Arial,sans-serif}
-header{padding:22px 18px;background:#101527;border-bottom:1px solid #27304a}
-.logo{font-size:24px;font-weight:800;color:#a78bfa}
-.sub{color:#9da8c2;font-size:13px;margin-top:8px}
-main{padding:18px;max-width:750px;margin:auto}
-.hero{text-align:center;padding:28px 5px}
-.hero h1{font-size:30px;line-height:1.2;margin:0 0 12px}
-.hero h1 span{color:#a78bfa}
-.hero p{color:#a9b4cd;font-size:14px;line-height:1.6}
-.card{background:#131a2e;border:1px solid #29324c;border-radius:20px;padding:19px;margin-bottom:18px}
-h2{font-size:19px;margin:0 0 16px}
-.tabs{display:flex;gap:10px;margin-bottom:20px}
-.tab{flex:1;padding:14px 8px;border:1px solid #343d59;border-radius:12px;background:#202840;color:#fff;font-weight:bold}
-.tab.active{background:#7c3aed;border-color:#7c3aed}
-label{display:block;font-size:14px;color:#cbd5e1;margin:17px 0 9px}
-textarea,select,input{width:100%;border:1px solid #39435f;background:#0b1020;color:white;border-radius:12px;padding:14px;font-size:15px}
-textarea{height:160px;resize:vertical;line-height:1.5}
-textarea:focus,select:focus{outline:2px solid #8b5cf6}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.upload{border:2px dashed #555e82;border-radius:15px;padding:20px;text-align:center;color:#b8c3dd}
-.upload input{margin-top:12px;font-size:12px}
-.generate{width:100%;padding:18px;background:linear-gradient(100deg,#7c3aed,#2563eb);color:#fff;border:0;border-radius:14px;font-size:17px;font-weight:800;margin-top:22px}
-.generate:active{opacity:.8}
-.preview{background:#070a13;min-height:230px;border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aab5cc}
-video{width:100%;border-radius:12px}
-.status{margin-top:15px;font-size:14px;color:#c4b5fd;line-height:1.6}
-.note{font-size:12px;color:#94a3b8;line-height:1.6}
-footer{text-align:center;padding:25px;color:#64748b;font-size:12px}
+body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
+header{padding:20px;background:#151c32;border-bottom:1px solid #303b59}
+.logo{font-size:23px;font-weight:800;color:#b69cff}
+main{padding:16px;max-width:750px;margin:auto}
+h1{font-size:26px;margin:22px 0 8px}
+p{color:#b9c5dd;line-height:1.6}
+.card{background:#172039;border:1px solid #303b59;border-radius:18px;padding:17px;margin:17px 0}
+label{display:block;margin-bottom:10px;font-weight:bold}
+textarea{width:100%;height:150px;background:#0b1226;color:white;border:1px solid #465475;border-radius:12px;padding:13px;font-size:15px;line-height:1.5}
+button{background:#7950e8;color:white;border:0;border-radius:12px;padding:14px;font-size:15px;font-weight:bold}
+.primary{width:100%;margin-top:13px}
+.controls{display:flex;gap:10px;margin-top:12px}
+.controls button{flex:1}
+.stage{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:14px;background:linear-gradient(#75c9fa 0%,#bcecff 65%,#65b86b 65%,#388443 100%)}
+.sun{position:absolute;right:12%;top:12%;width:42px;height:42px;border-radius:50%;background:#ffe780;box-shadow:0 0 35px #ffeb8a}
+.cloud{position:absolute;top:20%;left:10%;font-size:35px;animation:cloud 12s linear infinite}
+.tree{position:absolute;bottom:22%;font-size:62px}
+.tree.one{left:3%}.tree.two{right:3%}
+.character{position:absolute;bottom:15%;left:28%;font-size:65px;transition:left 1s ease,transform .5s}
+.character.walk{animation:bounce .6s ease-in-out infinite alternate}
+.friend{position:absolute;bottom:15%;right:18%;font-size:55px}
+.caption{position:absolute;bottom:3%;left:5%;width:90%;background:#0009;border-radius:9px;padding:8px;text-align:center;font-size:12px;line-height:1.4}
+.progress{font-size:13px;color:#b6c6e4;margin-top:12px}
+@keyframes bounce{to{transform:translateY(-12px)}}
+@keyframes cloud{to{left:85%}}
 </style>
 </head>
 <body>
-<header>
-<div class="logo">✦ Veggie AI Studio</div>
-<div class="sub">Cinematic AI Video Creation Studio</div>
-</header>
-
+<header><div class="logo">✦ Veggie Cartoon Studio</div></header>
 <main>
-<section class="hero">
-<h1>Create Amazing Videos <span>With AI</span></h1>
-<p>Turn your imagination into cinematic video experiences.</p>
+<h1>🎬 Story to Cartoon</h1>
+<p>Write a story and watch it turn into a simple animated cartoon.</p>
+
+<section class="card">
+<label>Your Story</label>
+<textarea id="story" placeholder="Example: A brave boy walked into a magical forest. He met a friendly rabbit. Together they discovered a mysterious castle."></textarea>
+<button class="primary" onclick="makeCartoon()">✨ Create Cartoon Scenes</button>
 </section>
 
 <section class="card">
-<h2>✨ Create New Video</h2>
-
-<div class="tabs">
-<button id="textTab" class="tab active" onclick="setMode('text')">✍ Text to Video</button>
-<button id="imageTab" class="tab" onclick="setMode('image')">▧ Image to Video</button>
+<label>🎥 Cartoon Preview</label>
+<div class="stage" id="stage">
+<div class="sun"> </div>
+<div class="cloud">☁️</div>
+<div class="tree one">🌳</div>
+<div class="tree two">🌲</div>
+<div class="character" id="hero">🧒</div>
+<div class="friend" id="friend">🐰</div>
+<div class="caption" id="caption">Your cartoon will appear here.</div>
 </div>
-
-<div id="imageArea" style="display:none">
-<label>Upload Reference Image</label>
-<div class="upload">
-Select an image from your phone
-<input id="referenceImage" type="file" accept="image/*">
+<div class="controls">
+<button onclick="playCartoon()">▶ Play</button>
+<button onclick="pauseCartoon()">⏸ Pause</button>
+<button onclick="restartCartoon()">↻ Restart</button>
 </div>
-</div>
-
-<label>Describe Your Video</label>
-<textarea id="prompt" placeholder="Example: A cinematic aerial shot of a beautiful mountain valley at sunrise, realistic clouds, smooth camera movement, natural lighting..."></textarea>
-
-<div class="row">
-<div>
-<label>Aspect Ratio</label>
-<select id="ratio">
-<option value="16:9">16:9 Landscape</option>
-<option value="9:16">9:16 Portrait</option>
-<option value="1:1">1:1 Square</option>
-</select>
-</div>
-<div>
-<label>Duration</label>
-<select id="duration">
-<option value="5">5 Seconds</option>
-<option value="8" selected>8 Seconds</option>
-<option value="10">10 Seconds</option>
-</select>
-</div>
-</div>
-
-<div class="row">
-<div>
-<label>Quality</label>
-<select id="quality">
-<option value="720p">720p HD</option>
-<option value="1080p">1080p Full HD</option>
-</select>
-</div>
-<div>
-<label>Visual Style</label>
-<select id="style">
-<option value="realistic">Photorealistic</option>
-<option value="cinematic">Cinematic</option>
-<option value="animation">3D Animation</option>
-<option value="anime">Anime</option>
-</select>
-</div>
-</div>
-
-<button class="generate" onclick="generateVideo()">✦ Generate AI Video</button>
-<div id="status" class="status" role="status"></div>
-<p class="note">Video generation requires a supported AI service and a secure backend. Available durations and resolutions depend on the connected model.</p>
-</section>
-
-<section class="card">
-<h2>🎬 Video Preview</h2>
-<div id="preview" class="preview">
-<div>🎥<p>Your generated video will appear here.</p></div>
-</div>
-</section>
-
-<section class="card">
-<h2>📁 My Projects</h2>
-<p class="note">Project history will be available after backend integration.</p>
+<div class="progress" id="progress">Enter a story to begin.</div>
 </section>
 </main>
 
-<footer>Veggie AI Studio • AI Video Creator</footer>
-
 <script>
-let mode="text";
+let scenes=[];
+let index=0;
+let timer=null;
+let playing=false;
 
-function setMode(next){
- mode=next;
- document.getElementById("textTab").classList.toggle("active",mode==="text");
- document.getElementById("imageTab").classList.toggle("active",mode==="image");
- document.getElementById("imageArea").style.display=mode==="image"?"block":"none";
- document.getElementById("status").textContent="";
+function makeCartoon(){
+ pauseCartoon();
+ const text=document.getElementById("story").value.trim();
+ if(!text){
+  document.getElementById("progress").textContent="Please write a story first.";
+  return;
+ }
+ scenes=text.match(/[^.!?۔؟]+[.!?۔؟]?/g)||[text];
+ scenes=scenes.map(s=>s.trim()).filter(Boolean);
+ index=0;
+ showScene();
+ document.getElementById("progress").textContent=
+ "Created "+scenes.length+" cartoon scenes. Press Play.";
 }
 
-function generateVideo(){
- const prompt=document.getElementById("prompt").value.trim();
- const status=document.getElementById("status");
+function showScene(){
+ if(!scenes.length)return;
+ const sentence=scenes[index];
+ document.getElementById("caption").textContent=sentence;
+ const hero=document.getElementById("hero");
+ const friend=document.getElementById("friend");
+ const stage=document.getElementById("stage");
+ hero.style.left=(20+(index%4)*12)+"%";
+ hero.textContent=/girl|princess|larki/i.test(sentence)?"👧":"🧒";
+ friend.textContent=/dragon/i.test(sentence)?"🐉":
+ /cat|billi/i.test(sentence)?"🐱":
+ /dog|kutta/i.test(sentence)?"🐶":"🐰";
+ stage.style.background=/night|raat|dark/i.test(sentence)?
+ "linear-gradient(#111b46 0%,#425c9e 65%,#234b38 65%,#163e2a 100%)":
+ "linear-gradient(#75c9fa 0%,#bcecff 65%,#65b86b 65%,#388443 100%)";
+ document.getElementById("progress").textContent=
+ "Scene "+(index+1)+" of "+scenes.length;
+}
 
- if(!prompt){
-  status.textContent="Please enter a video prompt first.";
-  return;
+function playCartoon(){
+ if(!scenes.length){
+  makeCartoon();
+  if(!scenes.length)return;
  }
+ if(playing)return;
+ playing=true;
+ document.getElementById("hero").classList.add("walk");
+ timer=setInterval(()=>{
+  index++;
+  if(index>=scenes.length){
+   pauseCartoon();
+   document.getElementById("progress").textContent="Cartoon finished!";
+   return;
+  }
+  showScene();
+ },3500);
+}
 
- if(mode==="image"&&!document.getElementById("referenceImage").files.length){
-  status.textContent="Please select a reference image first.";
-  return;
- }
+function pauseCartoon(){
+ playing=false;
+ clearInterval(timer);
+ timer=null;
+ document.getElementById("hero").classList.remove("walk");
+}
 
- status.textContent="Your prompt is ready. Real AI video generation is not connected yet. A secure backend and supported video generation API must be configured.";
+function restartCartoon(){
+ pauseCartoon();
+ index=0;
+ showScene();
+ playCartoon();
 }
 </script>
 </body>
