@@ -1,17 +1,158 @@
-<!DOCTYPE html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta charset="utf-8"><style>
-*{box-sizing:border-box}body{margin:0;background:#101b1c;color:#f7fff5;font-family:system-ui,sans-serif}.wrap{max-width:520px;margin:auto;padding:18px}h1{margin:4px 0;color:#b9f78d;font-size:25px}p{color:#b8c7bc;font-size:13px}label{font-size:13px;font-weight:700}textarea{width:100%;min-height:115px;background:#203031;color:white;border:1px solid #537268;border-radius:12px;padding:12px;font-size:14px;margin:7px 0 12px}button{background:#a6f077;border:0;border-radius:12px;padding:13px 15px;color:#172217;font-weight:800;margin:5px 4px 5px 0}button.secondary{background:#2d4540;color:white}canvas{display:block;width:min(100%,330px);height:auto;margin:16px auto;border-radius:20px;background:#89c6dd}.status{text-align:center;color:#b9f78d;font-weight:700}.hint{padding:12px;background:#223431;border-radius:12px;font-size:12px;line-height:1.6}
-</style></head><body><div class="wrap"><h1>🥔 Veggie AI Studio</h1><p>60-second Spanish vegetable cartoon story • Offline preview</p><label>Spanish dialogue (one line per scene)</label><textarea id="script">¡Amigos! ¡Nuestro pueblo se está quedando sin agua!
-¡Encontré un mapa de una cascada secreta!
-¡Vamos juntos por el bosque mágico!
-¡Miren! ¡Una roca bloquea el agua!
-¡Empujemos juntos! ¡Lo logramos!
-¡La unión hace la fuerza! ¡Hasta pronto!</textarea><div><button onclick="start()">▶ Play 60s Story</button><button class="secondary" onclick="stop()">■ Stop</button></div><canvas id="c" width="540" height="960"></canvas><div class="status" id="status">Ready • 00:00 / 01:00</div><p class="hint">The app draws a 60-second animated preview and uses your Android Spanish text-to-speech voice. It does not generate photorealistic AI footage, save MP4 files, or guarantee mouth-to-audio synchronization. Install a Spanish TTS voice in Android settings if speech is silent.</p></div><script>
-const c=document.getElementById('c'),x=c.getContext('2d');let running=false,startAt=0,raf=0,lastScene=-1;
-const colors=['#b58251','#f3f0d8','#b982bb'];const names=['PATATA','COLIFLOR','NABO'];
-function ellipse(cx,cy,rx,ry,color){x.fillStyle=color;x.beginPath();x.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);x.fill()}
-function veggie(cx,cy,type,active,t){x.save();x.translate(cx,cy+Math.sin(t*3+type)*7);let col=colors[type];x.strokeStyle='#3a4838';x.lineWidth=13;x.lineCap='round';for(let s of [-1,1]){x.beginPath();x.moveTo(s*42,110);x.lineTo(s*53,163);x.stroke();x.beginPath();x.moveTo(s*70,-5);x.lineTo(s*99,40+Math.sin(t*4)*9);x.stroke()}ellipse(0,0,81,112,col);if(type===1){for(let i=-2;i<=2;i++)ellipse(i*28,-84+(i%2)*12,36,37,'#fffef1');ellipse(-64,56,19,44,'#77ae6e');ellipse(64,56,19,44,'#77ae6e')}if(type===2){ellipse(0,-116,13,33,'#6fa95e');ellipse(-22,-120,14,27,'#6fa95e');ellipse(22,-120,14,27,'#6fa95e')}ellipse(-28,-16,11,16,'white');ellipse(28,-16,11,16,'white');ellipse(-28,-13,5,9,'#202a28');ellipse(28,-13,5,9,'#202a28');x.strokeStyle='#442f32';x.lineWidth=5;x.beginPath();if(active){ellipse(0,37,12,15,'#4b2730')}else{x.arc(0,25,21,0.2,Math.PI-0.2)}x.stroke();x.restore()}
-function draw(ms=0){let sec=Math.min(59.999,ms/1000),scene=Math.floor(sec/10),t=ms/1000;x.clearRect(0,0,540,960);let grad=x.createLinearGradient(0,0,0,960);grad.addColorStop(0,scene<3?'#76c9ee':'#ffd09d');grad.addColorStop(1,'#c9e8b6');x.fillStyle=grad;x.fillRect(0,0,540,960);ellipse(270,805,550,220,'#77ba71');ellipse(60,160,70,24,'#f2ffff');ellipse(400,230,90,29,'#f2ffff');x.textAlign='center';x.fillStyle='#20382c';x.font='bold 33px system-ui';x.fillText(['¡SIN AGUA!','EL MAPA','EL BOSQUE','LA CASCADA','¡LO LOGRAMOS!','¡AMIGOS!'][scene],270,110);let positions=[115,270,425];for(let i=0;i<3;i++)veggie(positions[i],530,i,i===scene%3,t);x.fillStyle='#152a25';x.font='bold 26px system-ui';names.forEach((n,i)=>x.fillText(n,positions[i],745));let lines=document.getElementById('script').value.split('\n');let line=lines[scene]||'';x.fillStyle='rgba(15,32,27,.82)';x.fillRect(20,785,500,128);x.fillStyle='white';x.font='24px system-ui';wrapText(line,270,826,460,30);x.font='20px system-ui';x.fillText('00:'+String(Math.floor(sec)).padStart(2,'0')+' / 01:00',270,940);document.getElementById('status').textContent='Scene '+(scene+1)+' / 6 • 00:'+String(Math.floor(sec)).padStart(2,'0')+' / 01:00';}
-function wrapText(text,cx,y,max,lineH){let words=text.split(' '),line='',lines=[];for(let w of words){let next=line?line+' '+w:w;if(x.measureText(next).width>max&&line){lines.push(line);line=w}else line=next}lines.push(line);lines.slice(0,3).forEach((l,i)=>x.fillText(l,cx,y+i*lineH))}
-function frame(now){if(!running)return;let elapsed=now-startAt,scene=Math.floor(elapsed/10000);if(scene!==lastScene&&scene<6){lastScene=scene;let lines=document.getElementById('script').value.split('\n');if(window.Android)Android.speak(lines[scene]||'')}draw(elapsed);if(elapsed<60000)raf=requestAnimationFrame(frame);else stop()}
-function start(){stop();running=true;lastScene=-1;startAt=performance.now();raf=requestAnimationFrame(frame)}function stop(){running=false;cancelAnimationFrame(raf);if(window.Android)Android.stop();draw(0)}draw(0);
-</script></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veggie AI Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b16;color:#fff;font-family:Arial,sans-serif}
+header{padding:22px 18px;background:#101527;border-bottom:1px solid #27304a}
+.logo{font-size:24px;font-weight:800;color:#a78bfa}
+.sub{color:#9da8c2;font-size:13px;margin-top:8px}
+main{padding:18px;max-width:750px;margin:auto}
+.hero{text-align:center;padding:28px 5px}
+.hero h1{font-size:30px;line-height:1.2;margin:0 0 12px}
+.hero h1 span{color:#a78bfa}
+.hero p{color:#a9b4cd;font-size:14px;line-height:1.6}
+.card{background:#131a2e;border:1px solid #29324c;border-radius:20px;padding:19px;margin-bottom:18px}
+h2{font-size:19px;margin:0 0 16px}
+.tabs{display:flex;gap:10px;margin-bottom:20px}
+.tab{flex:1;padding:14px 8px;border:1px solid #343d59;border-radius:12px;background:#202840;color:#fff;font-weight:bold}
+.tab.active{background:#7c3aed;border-color:#7c3aed}
+label{display:block;font-size:14px;color:#cbd5e1;margin:17px 0 9px}
+textarea,select,input{width:100%;border:1px solid #39435f;background:#0b1020;color:white;border-radius:12px;padding:14px;font-size:15px}
+textarea{height:160px;resize:vertical;line-height:1.5}
+textarea:focus,select:focus{outline:2px solid #8b5cf6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.upload{border:2px dashed #555e82;border-radius:15px;padding:20px;text-align:center;color:#b8c3dd}
+.upload input{margin-top:12px;font-size:12px}
+.generate{width:100%;padding:18px;background:linear-gradient(100deg,#7c3aed,#2563eb);color:#fff;border:0;border-radius:14px;font-size:17px;font-weight:800;margin-top:22px}
+.generate:active{opacity:.8}
+.preview{background:#070a13;min-height:230px;border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aab5cc}
+video{width:100%;border-radius:12px}
+.status{margin-top:15px;font-size:14px;color:#c4b5fd;line-height:1.6}
+.note{font-size:12px;color:#94a3b8;line-height:1.6}
+footer{text-align:center;padding:25px;color:#64748b;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">✦ Veggie AI Studio</div>
+<div class="sub">Cinematic AI Video Creation Studio</div>
+</header>
+
+<main>
+<section class="hero">
+<h1>Create Amazing Videos <span>With AI</span></h1>
+<p>Turn your imagination into cinematic video experiences.</p>
+</section>
+
+<section class="card">
+<h2>✨ Create New Video</h2>
+
+<div class="tabs">
+<button id="textTab" class="tab active" onclick="setMode('text')">✍ Text to Video</button>
+<button id="imageTab" class="tab" onclick="setMode('image')">▧ Image to Video</button>
+</div>
+
+<div id="imageArea" style="display:none">
+<label>Upload Reference Image</label>
+<div class="upload">
+Select an image from your phone
+<input id="referenceImage" type="file" accept="image/*">
+</div>
+</div>
+
+<label>Describe Your Video</label>
+<textarea id="prompt" placeholder="Example: A cinematic aerial shot of a beautiful mountain valley at sunrise, realistic clouds, smooth camera movement, natural lighting..."></textarea>
+
+<div class="row">
+<div>
+<label>Aspect Ratio</label>
+<select id="ratio">
+<option value="16:9">16:9 Landscape</option>
+<option value="9:16">9:16 Portrait</option>
+<option value="1:1">1:1 Square</option>
+</select>
+</div>
+<div>
+<label>Duration</label>
+<select id="duration">
+<option value="5">5 Seconds</option>
+<option value="8" selected>8 Seconds</option>
+<option value="10">10 Seconds</option>
+</select>
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Quality</label>
+<select id="quality">
+<option value="720p">720p HD</option>
+<option value="1080p">1080p Full HD</option>
+</select>
+</div>
+<div>
+<label>Visual Style</label>
+<select id="style">
+<option value="realistic">Photorealistic</option>
+<option value="cinematic">Cinematic</option>
+<option value="animation">3D Animation</option>
+<option value="anime">Anime</option>
+</select>
+</div>
+</div>
+
+<button class="generate" onclick="generateVideo()">✦ Generate AI Video</button>
+<div id="status" class="status" role="status"></div>
+<p class="note">Video generation requires a supported AI service and a secure backend. Available durations and resolutions depend on the connected model.</p>
+</section>
+
+<section class="card">
+<h2>🎬 Video Preview</h2>
+<div id="preview" class="preview">
+<div>🎥<p>Your generated video will appear here.</p></div>
+</div>
+</section>
+
+<section class="card">
+<h2>📁 My Projects</h2>
+<p class="note">Project history will be available after backend integration.</p>
+</section>
+</main>
+
+<footer>Veggie AI Studio • AI Video Creator</footer>
+
+<script>
+let mode="text";
+
+function setMode(next){
+ mode=next;
+ document.getElementById("textTab").classList.toggle("active",mode==="text");
+ document.getElementById("imageTab").classList.toggle("active",mode==="image");
+ document.getElementById("imageArea").style.display=mode==="image"?"block":"none";
+ document.getElementById("status").textContent="";
+}
+
+function generateVideo(){
+ const prompt=document.getElementById("prompt").value.trim();
+ const status=document.getElementById("status");
+
+ if(!prompt){
+  status.textContent="Please enter a video prompt first.";
+  return;
+ }
+
+ if(mode==="image"&&!document.getElementById("referenceImage").files.length){
+  status.textContent="Please select a reference image first.";
+  return;
+ }
+
+ status.textContent="Your prompt is ready. Real AI video generation is not connected yet. A secure backend and supported video generation API must be configured.";
+}
+</script>
+</body>
+</html>
